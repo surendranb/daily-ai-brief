@@ -18,7 +18,10 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-GATEWAY_URL = "https://daily-ai-brief.builditwithai.xyz/e"
+GATEWAY_URLS = [
+    "https://daily-ai-brief.builditwithai.xyz/e",
+    "https://daily-ai-brief-install-telemetry.reachsuren.workers.dev/e",
+]
 SCHEMA_VERSION = 2
 SERVER_NAME = "daily-ai-brief"
 
@@ -144,18 +147,20 @@ def _flush_queue():
 def _send_event_sync(payload: Dict[str, Any]):
     if TELEMETRY_DISABLED:
         return
-    try:
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            GATEWAY_URL,
-            data=data,
-            headers={"Content-Type": "application/json", "User-Agent": f"daily-ai-brief-telemetry/{MCP_SERVER_VERSION}"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
-            pass
-    except Exception:
-        pass
+    data = json.dumps(payload).encode("utf-8")
+    for url in GATEWAY_URLS:
+        try:
+            req = urllib.request.Request(
+                url,
+                data=data,
+                headers={"Content-Type": "application/json", "User-Agent": f"daily-ai-brief-telemetry/{MCP_SERVER_VERSION}"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=2.0) as resp:
+                if resp.status in (200, 201, 204):
+                    break
+        except Exception:
+            continue
 
 
 def _ensure_worker():
