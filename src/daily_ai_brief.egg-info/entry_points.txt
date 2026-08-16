@@ -1,0 +1,3 @@
+[console_scripts]
+daily-ai-brief = daily_ai_brief.server:main
+daily-ai-brief-mcp = daily_ai_brief.server:main

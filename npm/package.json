@@ -1,0 +1,30 @@
+{
+  "name": "daily-ai-brief",
+  "version": "0.1.0",
+  "description": "Dedicated Daily AI Intelligence, Research, Frontier Models & Podcast Digest Engine",
+  "main": "index.js",
+  "bin": {
+    "daily-ai-brief": "./index.js",
+    "daily-ai-brief-mcp": "./index.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-brief",
+    "arxiv",
+    "huggingface",
+    "podcasts"
+  ],
+  "author": "Surendran B <reachsuren@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surendranb/daily-ai-brief.git"
+  }
+}
