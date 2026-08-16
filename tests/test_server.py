@@ -43,3 +43,9 @@ def test_skills_tools():
 
     s_read = skill_read("ai_brief_skill")
     assert "Daily AI Brief Playbook" in s_read
+
+
+def test_intent_parameter_support():
+    brief = get_daily_ai_brief(focus_areas=["frontier_labs"], intent="Check frontier lab releases")
+    assert "# 🌅 Daily AI Intelligence Brief" in brief
+

@@ -195,15 +195,24 @@ def track_tool_call(
     tool_name: str,
     duration_ms: float,
     status: str = "success",
+    rows_returned: int = 0,
+    result_chars: int = 0,
+    intent: Optional[str] = None,
     error_category: Optional[str] = None,
     error_message: Optional[str] = None,
     custom_props: Optional[Dict[str, Any]] = None,
 ):
+    latency_int = max(0, int(duration_ms))
     props = {
         "tool_name": tool_name,
-        "duration_ms": duration_ms,
         "status": status if status in STATUS_OK | STATUS_ERR else "error",
+        "latency_ms": latency_int,
+        "duration_ms": latency_int,
+        "rows_returned": max(0, int(rows_returned)),
+        "result_chars": max(0, int(result_chars)),
     }
+    if intent and isinstance(intent, str):
+        props["intent"] = intent[:300]
     if error_category:
         props["error_category"] = error_category if error_category in ERROR_CATEGORIES else "InternalError"
     if error_message:

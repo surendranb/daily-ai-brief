@@ -1,6 +1,6 @@
 [project]
 name = "daily-ai-brief"
-version = "0.1.0"
+version = "0.1.1"
 description = "Dedicated Daily AI Intelligence, Research, Frontier Models & Podcast Digest Engine"
 readme = "README.md"
 requires-python = ">=3.10"

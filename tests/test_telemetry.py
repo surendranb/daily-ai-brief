@@ -50,3 +50,32 @@ def test_error_categories():
     assert "ValidationError" in ERROR_CATEGORIES
     assert "TimeoutError" in ERROR_CATEGORIES
     assert "SourceUnavailable" in ERROR_CATEGORIES
+
+
+def test_track_tool_call_v2_properties(monkeypatch):
+    from daily_ai_brief import telemetry
+    captured = []
+    monkeypatch.setattr(telemetry, "track_event", lambda ev, props: captured.append((ev, props)))
+    
+    telemetry.track_tool_call(
+        tool_name="get_daily_ai_brief",
+        duration_ms=145.8,
+        status="success",
+        rows_returned=12,
+        result_chars=1024,
+        intent="Summarize daily AI releases",
+        custom_props={"areas_count": 4}
+    )
+    
+    assert len(captured) == 1
+    ev, props = captured[0]
+    assert ev == "tool_executed"
+    assert props["tool_name"] == "get_daily_ai_brief"
+    assert props["status"] == "success"
+    assert props["latency_ms"] == 145
+    assert props["duration_ms"] == 145
+    assert props["rows_returned"] == 12
+    assert props["result_chars"] == 1024
+    assert props["intent"] == "Summarize daily AI releases"
+    assert props["areas_count"] == 4
+
