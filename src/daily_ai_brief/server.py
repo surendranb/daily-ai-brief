@@ -32,7 +32,12 @@ from daily_ai_brief.fetchers.podcasts import (
     fetch_all_ai_podcasts,
     fetch_podcast_episodes,
 )
-from daily_ai_brief.telemetry import MCP_SERVER_VERSION, track_event, track_tool_call
+from daily_ai_brief.telemetry import (
+    MCP_SERVER_VERSION,
+    classify_exception,
+    track_event,
+    track_tool_call,
+)
 
 mcp = MCPServer(
     "daily-ai-brief",
@@ -150,10 +155,10 @@ def get_daily_ai_brief(
             rows_returned=0,
             result_chars=0,
             intent=intent,
-            error_category="APIError",
+            error_category=classify_exception(exc),
             error_message=str(exc),
         )
-        return f"[ENVIRONMENT_FIXABLE: STOP & ASK HUMAN] Failed to synthesize daily AI brief: {exc}"
+        return f"[INPUT_FIXABLE] Failed to compile Daily AI Brief: {exc}"
 
 
 @mcp.tool(annotations=_ANNOTATIONS_EXTERNAL)
@@ -215,10 +220,10 @@ def get_frontier_lab_updates(
             rows_returned=0,
             result_chars=0,
             intent=intent,
-            error_category="APIError",
+            error_category=classify_exception(exc),
             error_message=str(exc),
         )
-        return f"[INPUT_FIXABLE] Error fetching frontier lab updates: {exc}"
+        return f"[INPUT_FIXABLE] Failed to fetch frontier lab updates for '{labs}': {exc}"
 
 
 @mcp.tool(annotations=_ANNOTATIONS_EXTERNAL)
@@ -281,10 +286,10 @@ def get_ai_podcasts(
             rows_returned=0,
             result_chars=0,
             intent=intent,
-            error_category="APIError",
+            error_category=classify_exception(exc),
             error_message=str(exc),
         )
-        return f"[INPUT_FIXABLE] Error fetching AI podcasts: {exc}"
+        return f"[INPUT_FIXABLE] Failed to fetch podcast episodes for '{podcasts}': {exc}"
 
 
 @mcp.tool(annotations=_ANNOTATIONS_EXTERNAL)
@@ -340,7 +345,7 @@ def get_model_drops(
             rows_returned=0,
             result_chars=0,
             intent=intent,
-            error_category="APIError",
+            error_category=classify_exception(exc),
             error_message=str(exc),
         )
         return f"[TRANSIENT] Error querying Hugging Face Hub: {exc}"
@@ -406,10 +411,10 @@ def get_arxiv_breakthroughs(
             rows_returned=0,
             result_chars=0,
             intent=intent,
-            error_category="APIError",
+            error_category=classify_exception(exc),
             error_message=str(exc),
         )
-        return f"[INPUT_FIXABLE] Error fetching arXiv breakthroughs: {exc}"
+        return f"[INPUT_FIXABLE] Failed to fetch research papers: {exc}"
 
 
 @mcp.tool(annotations=_ANNOTATIONS_LOCAL)

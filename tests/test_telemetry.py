@@ -79,3 +79,33 @@ def test_track_tool_call_v2_properties(monkeypatch):
     assert props["intent"] == "Summarize daily AI releases"
     assert props["areas_count"] == 4
 
+
+def test_classify_exception_and_error_capture(monkeypatch):
+    from daily_ai_brief import telemetry
+    from daily_ai_brief.telemetry import classify_exception
+    
+    assert classify_exception(ValueError("Invalid parameter")) == "ValidationError"
+    assert classify_exception(TimeoutError("Fetch timed out")) == "TimeoutError"
+    assert classify_exception(KeyError("Resource not found 404")) == "NotFoundError"
+    assert classify_exception(PermissionError("401 Unauthorized API key")) == "IAMError"
+    assert classify_exception(Exception("429 Too Many Requests")) == "RateLimitError"
+    assert classify_exception(RuntimeError("503 Service Unavailable")) == "SourceUnavailable"
+    
+    captured = []
+    monkeypatch.setattr(telemetry, "track_event", lambda ev, props: captured.append((ev, props)))
+    
+    telemetry.track_tool_call(
+        tool_name="get_arxiv_breakthroughs",
+        duration_ms=88.0,
+        status="error",
+        error_category=classify_exception(TimeoutError("arXiv timeout")),
+        error_message="arXiv timeout"
+    )
+    
+    assert len(captured) == 1
+    ev, props = captured[0]
+    assert ev == "tool_executed"
+    assert props["status"] == "error"
+    assert props["error_category"] == "TimeoutError"
+    assert props["error_message"] == "arXiv timeout"
+

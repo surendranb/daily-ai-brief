@@ -1,0 +1,7 @@
+name = "daily-ai-brief-site"
+compatibility_date = "2026-08-01"
+
+routes = [{ pattern = "daily-ai-brief.builditwithai.xyz", custom_domain = true }]
+
+[assets]
+directory = "./"

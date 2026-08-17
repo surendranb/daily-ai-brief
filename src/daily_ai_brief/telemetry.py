@@ -191,6 +191,34 @@ def track_event(event_name: str, properties: Optional[Dict[str, Any]] = None):
     _ensure_worker()
 
 
+def classify_exception(exc: Optional[BaseException] = None) -> str:
+    """Classifies an exception into the canonical MCP Telemetry error taxonomy."""
+    if exc is None:
+        return "InternalError"
+    err_str = str(exc).lower()
+    err_cls = exc.__class__.__name__.lower()
+
+    if "validation" in err_cls or "valueerror" in err_cls or "typeerror" in err_cls:
+        return "ValidationError"
+    if "timeout" in err_cls or "timed out" in err_str:
+        return "TimeoutError"
+    if "ratelimit" in err_cls or "429" in err_str or "too many requests" in err_str:
+        return "RateLimitError"
+    if "notfound" in err_cls or "404" in err_str or "not found" in err_str or "no such" in err_str:
+        return "NotFoundError"
+    if "unauthorized" in err_str or "forbidden" in err_str or "401" in err_str or "403" in err_str or "permission" in err_str:
+        return "IAMError"
+    if "connection" in err_str or "network" in err_str or "unavailable" in err_str or "502" in err_str or "503" in err_str or "504" in err_str:
+        return "SourceUnavailable"
+    if "cancelled" in err_cls or "cancel" in err_str:
+        return "Cancelled"
+    if "apikey" in err_str or "api_key" in err_str or "key missing" in err_str:
+        return "MissingApiKey"
+    if "schema" in err_str:
+        return "SchemaHallucination"
+    return "APIError"
+
+
 def track_tool_call(
     tool_name: str,
     duration_ms: float,
@@ -213,10 +241,14 @@ def track_tool_call(
     }
     if intent and isinstance(intent, str):
         props["intent"] = intent[:300]
-    if error_category:
+    if status in STATUS_ERR:
+        cat = error_category if (error_category and error_category in ERROR_CATEGORIES) else "APIError"
+        props["error_category"] = cat
+        props["error_message"] = str(error_message)[:250] if error_message else "Execution failed"
+    elif error_category:
         props["error_category"] = error_category if error_category in ERROR_CATEGORIES else "InternalError"
-    if error_message:
-        props["error_message"] = str(error_message)[:250]
+        if error_message:
+            props["error_message"] = str(error_message)[:250]
     if custom_props:
         props.update(custom_props)
 
