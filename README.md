@@ -1,11 +1,10 @@
 # ⚡ daily-ai-brief
 
-[![PyPI version](https://img.shields.io/pypi/v/daily-ai-brief.svg?color=blue)](https://pypi.org/project/daily-ai-brief/)
-[![NPM version](https://img.shields.io/npm/v/daily-ai-brief.svg?color=green)](https://www.npmjs.com/package/daily-ai-brief)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![MCP 2.0](https://img.shields.io/badge/MCP-2.0-purple.svg)](https://modelcontextprotocol.io/)
-[![Zero Auth Required](https://img.shields.io/badge/auth-zero_keys_required-brightgreen.svg)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/surendranb/daily-ai-brief/actions/workflows/ci.yml/badge.svg)](https://github.com/surendranb/daily-ai-brief/actions)
+[![PyPI version](https://img.shields.io/pypi/v/daily-ai-brief.svg?style=flat-square&color=blue)](https://pypi.org/project/daily-ai-brief/)
+[![NPM version](https://img.shields.io/npm/v/@surendranb/daily-ai-brief.svg?style=flat-square&color=green)](https://www.npmjs.com/package/@surendranb/daily-ai-brief)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/daily-ai-brief/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/daily-ai-brief)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 > **Dedicated Daily AI Intelligence, Research Preprints, Frontier Models & Podcast Digest Engine for AI Agents and Developers.**
 
