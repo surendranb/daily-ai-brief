@@ -24,11 +24,6 @@ curl -fsSL https://daily-ai-brief.builditwithai.xyz/install | bash
 uvx daily-ai-brief
 ```
 
-### 📦 Option 3: Run via Node (`npx`)
-```bash
-npx -y @surendranb/daily-ai-brief
-```
-
 ---
 
 ## 🛠️ Model Context Protocol (MCP) Setup
@@ -54,8 +49,8 @@ Add to your IDE MCP settings:
 {
   "mcpServers": {
     "daily-ai-brief": {
-      "command": "npx",
-      "args": ["-y", "@surendranb/daily-ai-brief"]
+      "command": "uvx",
+      "args": ["daily-ai-brief"]
     }
   }
 }
