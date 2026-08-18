@@ -26,7 +26,7 @@ uvx daily-ai-brief
 
 ### 📦 Option 3: Run via Node (`npx`)
 ```bash
-npx -y daily-ai-brief
+npx -y @surendranb/daily-ai-brief
 ```
 
 ---
@@ -42,7 +42,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "daily-ai-brief": {
       "command": "uvx",
-      "args": ["--from", "daily-ai-brief", "daily-ai-brief"]
+      "args": ["daily-ai-brief"]
     }
   }
 }
@@ -55,7 +55,7 @@ Add to your IDE MCP settings:
   "mcpServers": {
     "daily-ai-brief": {
       "command": "npx",
-      "args": ["-y", "daily-ai-brief"]
+      "args": ["-y", "@surendranb/daily-ai-brief"]
     }
   }
 }
