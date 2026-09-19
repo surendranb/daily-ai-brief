@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import re
+import signal
 import sys
 import threading
 import time
@@ -219,6 +220,45 @@ def classify_exception(exc: Optional[BaseException] = None) -> str:
     return "APIError"
 
 
+_SESSION_START = time.time()
+_TOOL_SEQUENCE: list[str] = []
+_TOOL_COUNTS: dict[str, int] = {}
+_EXIT_REASON = "clean"
+_EXIT_EXCEPTION = None
+
+
+def _capture_excepthook(exc_type, exc_value, exc_traceback):
+    global _EXIT_REASON, _EXIT_EXCEPTION
+    _EXIT_REASON = "exception"
+    _EXIT_EXCEPTION = exc_type.__name__ if exc_type else "UnknownException"
+    if _original_excepthook and callable(_original_excepthook):
+        _original_excepthook(exc_type, exc_value, exc_traceback)
+
+
+_original_excepthook = getattr(sys, "excepthook", None)
+sys.excepthook = _capture_excepthook
+
+_original_signals = {}
+
+
+def _capture_signal(sig, frame):
+    global _EXIT_REASON
+    _EXIT_REASON = "signal"
+    orig = _original_signals.get(sig)
+    if callable(orig):
+        orig(sig, frame)
+    else:
+        sys.exit(128 + sig)
+
+
+try:
+    for s in (signal.SIGINT, signal.SIGTERM):
+        _original_signals[s] = signal.getsignal(s)
+        signal.signal(s, _capture_signal)
+except (ValueError, AttributeError):
+    pass
+
+
 def track_tool_call(
     tool_name: str,
     duration_ms: float,
@@ -230,6 +270,11 @@ def track_tool_call(
     error_message: Optional[str] = None,
     custom_props: Optional[Dict[str, Any]] = None,
 ):
+    _TOOL_SEQUENCE.append(tool_name)
+    if len(_TOOL_SEQUENCE) > 100:
+        _TOOL_SEQUENCE.pop(0)
+    _TOOL_COUNTS[tool_name] = _TOOL_COUNTS.get(tool_name, 0) + 1
+
     latency_int = max(0, int(duration_ms))
     props = {
         "tool_name": tool_name,
@@ -255,6 +300,21 @@ def track_tool_call(
     track_event("tool_executed", props)
 
 
+def _emit_session_end():
+    if TELEMETRY_DISABLED:
+        return
+    payload = {
+        "session_duration_s": int(time.time() - _SESSION_START),
+        "tool_sequence": list(_TOOL_SEQUENCE),
+        "tool_counts": dict(_TOOL_COUNTS),
+        "calls_total": len(_TOOL_SEQUENCE),
+        "exit_reason": _EXIT_REASON,
+    }
+    if _EXIT_EXCEPTION:
+        payload["exit_exception"] = _EXIT_EXCEPTION
+    track_event("session_end", payload)
+
+
 def flush_and_close():
     _SHUTDOWN.set()
     batch = []
@@ -266,3 +326,4 @@ def flush_and_close():
 
 
 atexit.register(flush_and_close)
+atexit.register(_emit_session_end)

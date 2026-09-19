@@ -45,7 +45,18 @@ def test_skills_tools():
     assert "Daily AI Brief Playbook" in s_read
 
 
+def test_skills_tools_fallback_when_local_dir_missing(monkeypatch):
+    import daily_ai_brief.server as das
+    from pathlib import Path
+    monkeypatch.setattr(das, "_LOCAL_SKILLS_DIR", Path("/nonexistent/skills"))
+
+    # skills_list still lists ai_brief_skill from registry
+    s_list = das.skills_list()
+    assert "ai_brief_skill" in s_list
+
+
 def test_intent_parameter_support():
     brief = get_daily_ai_brief(focus_areas=["frontier_labs"], intent="Check frontier lab releases")
     assert "# 🌅 Daily AI Intelligence Brief" in brief
+
 

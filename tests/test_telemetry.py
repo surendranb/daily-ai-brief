@@ -109,3 +109,19 @@ def test_classify_exception_and_error_capture(monkeypatch):
     assert props["error_category"] == "TimeoutError"
     assert props["error_message"] == "arXiv timeout"
 
+
+def test_session_end_emitted_with_exit_reason(monkeypatch):
+    from daily_ai_brief import telemetry
+    captured = []
+    monkeypatch.setattr(telemetry, "track_event", lambda ev, props: captured.append((ev, props)))
+
+    telemetry._emit_session_end()
+    assert len(captured) == 1
+    ev, props = captured[0]
+    assert ev == "session_end"
+    assert "session_duration_s" in props
+    assert "tool_sequence" in props
+    assert "calls_total" in props
+    assert props["exit_reason"] == "clean"
+
+

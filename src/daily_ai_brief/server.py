@@ -417,6 +417,44 @@ def get_arxiv_breakthroughs(
         return f"[INPUT_FIXABLE] Failed to fetch research papers: {exc}"
 
 
+_SKILLS_BASE_URL = "https://raw.githubusercontent.com/surendranb/daily-ai-brief/main/skills/"
+_SKILLS_REGISTRY = {
+    "ai_brief_skill": "Curated daily executive briefing playbook across frontier labs, papers, podcasts, and community discussions",
+}
+_LOCAL_SKILLS_DIR = Path(__file__).resolve().parent.parent.parent / "skills"
+if not _LOCAL_SKILLS_DIR.is_dir() and (Path.cwd() / "skills").is_dir():
+    _LOCAL_SKILLS_DIR = Path.cwd() / "skills"
+
+
+def _load_skill(name: str) -> tuple[Optional[str], bool]:
+    content: Optional[str] = None
+    fetch_ok = False
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            f"{_SKILLS_BASE_URL}{name}.md",
+            headers={"User-Agent": f"daily-ai-brief/{MCP_SERVER_VERSION}"},
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            if resp.status == 200:
+                raw = resp.read().decode("utf-8")
+                if raw.strip():
+                    content = raw
+                    fetch_ok = True
+    except Exception:
+        pass
+
+    if content is None:
+        try:
+            local = _LOCAL_SKILLS_DIR / f"{name}.md"
+            if local.is_file():
+                content = local.read_text(encoding="utf-8")
+        except Exception:
+            pass
+
+    return content, fetch_ok
+
+
 @mcp.tool(annotations=_ANNOTATIONS_LOCAL)
 def skill_read(skill_name: str = "ai_brief_skill") -> str:
     """Read a dynamic skill playbook bundled with daily-ai-brief.
@@ -426,19 +464,19 @@ def skill_read(skill_name: str = "ai_brief_skill") -> str:
     """
     t0 = time.perf_counter()
     try:
-        skill_path = Path(__file__).parent.parent.parent / "skills" / f"{skill_name}.md"
-        if not skill_path.exists():
+        content, fetch_ok = _load_skill(skill_name)
+        if content is None:
+            msg = f"[INPUT_FIXABLE] Skill '{skill_name}' not found. Use skills_list() to view available playbooks."
             track_tool_call(
                 "skill_read",
                 (time.perf_counter() - t0) * 1000.0,
                 status="error",
                 rows_returned=0,
-                result_chars=len(f"[INPUT_FIXABLE] Skill '{skill_name}' not found. Use skills_list() to view available playbooks."),
+                result_chars=len(msg),
                 error_category="NotFoundError",
                 error_message=f"Skill '{skill_name}' not found",
             )
-            return f"[INPUT_FIXABLE] Skill '{skill_name}' not found. Use skills_list() to view available playbooks."
-        content = skill_path.read_text(encoding="utf-8")
+            return msg
         duration_ms = (time.perf_counter() - t0) * 1000.0
         track_tool_call(
             "skill_read",
@@ -446,6 +484,7 @@ def skill_read(skill_name: str = "ai_brief_skill") -> str:
             status="success",
             rows_returned=1,
             result_chars=len(content),
+            custom_props={"fetch_ok": fetch_ok},
         )
         return content
     except Exception as exc:
@@ -467,24 +506,17 @@ def skills_list() -> str:
     """List all dynamic skill playbooks available in daily-ai-brief."""
     t0 = time.perf_counter()
     try:
-        skills_dir = Path(__file__).parent.parent.parent / "skills"
-        if not skills_dir.exists():
-            track_tool_call(
-                "skills_list",
-                (time.perf_counter() - t0) * 1000.0,
-                status="success",
-                rows_returned=0,
-                result_chars=len("No skills directory found."),
-            )
-            return "No skills directory found."
-        skills = [f.stem for f in skills_dir.glob("*.md")]
-        result_text = f"Available skills: {', '.join(skills)}"
+        skills = set(_SKILLS_REGISTRY.keys())
+        if _LOCAL_SKILLS_DIR.is_dir():
+            skills.update(f.stem for f in _LOCAL_SKILLS_DIR.glob("*.md"))
+        skills_sorted = sorted(skills)
+        result_text = f"Available skills: {', '.join(skills_sorted)}"
         duration_ms = (time.perf_counter() - t0) * 1000.0
         track_tool_call(
             "skills_list",
             duration_ms,
             status="success",
-            rows_returned=len(skills),
+            rows_returned=len(skills_sorted),
             result_chars=len(result_text),
         )
         return result_text
