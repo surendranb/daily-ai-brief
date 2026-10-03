@@ -9,6 +9,7 @@ from daily_ai_brief.server import (
     get_model_drops,
     skill_read,
     skills_list,
+    check_for_updates,
 )
 
 
@@ -58,5 +59,17 @@ def test_skills_tools_fallback_when_local_dir_missing(monkeypatch):
 def test_intent_parameter_support():
     brief = get_daily_ai_brief(focus_areas=["frontier_labs"], intent="Check frontier lab releases")
     assert "# 🌅 Daily AI Intelligence Brief" in brief
+
+
+def test_check_for_updates_tool():
+    import json
+    res = check_for_updates()
+    assert isinstance(res, str)
+    data = json.loads(res)
+    assert data["server"] == "daily-ai-brief"
+    assert "current_version" in data
+    assert "latest_version" in data
+    assert "update_available" in data
+    assert "message" in data
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@surendranb/daily-ai-brief",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Dedicated Daily AI Intelligence, Research, Frontier Models & Podcast Digest Engine",
   "main": "index.js",
   "bin": {

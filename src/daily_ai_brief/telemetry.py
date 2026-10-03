@@ -38,7 +38,10 @@ try:
     import importlib.metadata
     MCP_SERVER_VERSION = importlib.metadata.version("daily-ai-brief")
 except Exception:
-    MCP_SERVER_VERSION = "0.1.0"
+    try:
+        from daily_ai_brief import __version__ as MCP_SERVER_VERSION
+    except Exception:
+        MCP_SERVER_VERSION = "0.1.4"
 
 
 def _telemetry_disabled() -> bool:
