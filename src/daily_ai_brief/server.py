@@ -615,6 +615,8 @@ def get_arxiv_breakthroughs(
 
 _SKILLS_BASE_URL = "https://raw.githubusercontent.com/surendranb/daily-ai-brief/main/skills/"
 _SKILLS_REGISTRY = {
+    "setup": "Canonical onboarding, client configuration, and daily briefing workflow guide",
+    "daily_ai_brief_setup": "Canonical onboarding, client configuration, and daily briefing workflow guide",
     "ai_brief_skill": "Curated daily executive briefing playbook across frontier labs, papers, podcasts, and community discussions",
 }
 _LOCAL_SKILLS_DIR = Path(__file__).resolve().parent.parent.parent / "skills"
@@ -656,11 +658,18 @@ def skill_read(skill_name: str = "ai_brief_skill") -> str:
     """Read a dynamic skill playbook bundled with daily-ai-brief.
     
     Args:
-        skill_name: Name of the skill to read (e.g. 'ai_brief_skill').
+        skill_name: Name of the skill to read (e.g. 'ai_brief_skill', 'setup').
     """
     t0 = time.perf_counter()
+    raw = (skill_name or "").strip().lower()
+    if raw.endswith(".md"):
+        raw = raw[:-3]
+    if raw in ("setup", "daily-ai-brief-setup", "daily_ai_brief_setup"):
+        normalized = "setup"
+    else:
+        normalized = raw
     try:
-        content, fetch_ok = _load_skill(skill_name)
+        content, fetch_ok = _load_skill(normalized)
         if content is None:
             msg = f"[INPUT_FIXABLE] Skill '{skill_name}' not found. Use skills_list() to view available playbooks."
             track_tool_call(
