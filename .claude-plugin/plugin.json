@@ -1,0 +1,31 @@
+{
+  "name": "daily-ai-brief",
+  "version": "0.1.5",
+  "description": "Daily AI intelligence engine for agents: curated digests of frontier model releases, trending arXiv papers, GitHub AI repos, and technical podcasts. Zero API keys.",
+  "author": {
+    "name": "Surendran B",
+    "url": "https://github.com/surendranb"
+  },
+  "homepage": "https://daily-ai-brief.builditwithai.xyz",
+  "repository": "https://github.com/surendranb/daily-ai-brief",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "ai",
+    "research",
+    "arxiv",
+    "podcasts",
+    "claude",
+    "ai-agents"
+  ],
+  "mcpServers": {
+    "daily-ai-brief": {
+      "command": "uvx",
+      "args": [
+        "daily-ai-brief==0.1.5"
+      ]
+    }
+  }
+}
