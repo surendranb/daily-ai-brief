@@ -1,0 +1,19 @@
+{
+  "name": "daily-ai-brief",
+  "owner": {
+    "name": "Surendran B",
+    "url": "https://github.com/surendranb"
+  },
+  "metadata": {
+    "description": "Daily AI intelligence engine for agents: curated digests of frontier model releases, trending arXiv papers, GitHub AI repos, and technical podcasts. Zero API keys.",
+    "version": "0.1.5"
+  },
+  "plugins": [
+    {
+      "name": "daily-ai-brief",
+      "source": "./",
+      "description": "Daily AI intelligence engine for agents: curated digests of frontier model releases, trending arXiv papers, GitHub AI repos, and technical podcasts. Zero API keys.",
+      "strict": false
+    }
+  ]
+}
